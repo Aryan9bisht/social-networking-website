@@ -3,18 +3,20 @@ const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
 //authentication using passport
 passport.use(new LocalStrategy({
-    usernameField: 'email'
-}, function(email, password, done) {
+
+    usernameField: 'email',
+    passReqToCallback: true
+}, function(req, email, password, done) {
     //find user and establish identity
     User.findOne({
         email: email
     }, function(err, user) {
         if (err) {
-            console.log('error in finding user');
+            req.flash("No user available recheck");
             return done(err);
         }
         if (!user || user.password != password) {
-            console.log('invalid username/password');
+            req.flash("invalid/username/pass");
             return done(null, false);
         }
         return done(null, user);
@@ -42,7 +44,7 @@ passport.checkAuthentication = function(req, res, next) {
         return next();
 
     }
-    //if user is not signed in 
+    //if user is not signed in
     return res.redirect('/users/sign-in');
 }
 
